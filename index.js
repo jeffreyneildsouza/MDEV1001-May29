@@ -1,9 +1,11 @@
-const sqlite = require("sqlite3").verbose();
+const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database(":memory:");
 
 db.serialize(function(){
+    //creating instructor table
     db.run("CREATE TABLE Instructor(ID NUMBER, Name TEXT, Dept_name TEXT, Salary NUMBER)");
+    
     db.run("INSERT INTO Instructor VALUES(10101, 'Srinivasan', 'Comp. Sci.', 65000)");
     db.run("INSERT INTO Instructor VALUES(12121, 'Wu', 'Finance', 90000)");
     db.run("INSERT INTO Instructor VALUES(15151, 'Mozart', 'Music', 90000)");
@@ -17,6 +19,92 @@ db.serialize(function(){
     db.run("INSERT INTO Instructor VALUES(3456, 'Brandt', 'Comp. Sci.', 92000)");
     db.run("INSERT INTO Instructor VALUES(45565, 'Kim', 'Elec. Eng.', 80000)");
 
+    //creating teaches table
+    db.run("CREATE TABLE Teaches(ID NUMBER, Course_id TEXT, Sec_id NUBER, Semester TEXT, Year NUMBER)");
 
+    db.run("INSERT INTO Teaches VALUES(10101, 'CS-101', 1, 'Fall' , 2009)");
+    db.run("INSERT INTO Teaches VALUES(10101, 'CS-315', 1, 'Spring' ,2010)");
+    db.run("INSERT INTO Teaches VALUES(10101, 'CS-347', 1, 'Fall' ,2019)");
+    db.run("INSERT INTO Teaches VALUES(12121, 'FIN-201', 1 , 'Spring' , 2009)");
+    db.run("INSERT INTO Teaches VALUES(15151, 'MU-199', 1 , 'Spring' , 2010)");
+    db.run("INSERT INTO Teaches VALUES(22222, 'PHY-101', 1 , 'Fall' , 2009)");
+    db.run("INSERT INTO Teaches VALUES(23343, 'HIS-351', 1 , 'Spring' ,2010)");
+    db.run("INSERT INTO Teaches VALUES(45565, 'CS-101', 1 , 'Spring' , 2009)");
+    db.run("INSERT INTO Teaches VALUES(45565, 'CS-3109', 1 , 'Spring' ,2010)");
+    db.run("INSERT INTO Teaches VALUES(76766, 'BIO-101', 1 , 'Summer' ,2009)");
+    db.run("INSERT INTO Teaches VALUES(76766, 'BIO-301', 1 , 'Summer' ,2010)");
+    db.run("INSERT INTO Teaches VALUES(83821, 'CS-190', 1 , 'Spring' , 2009)");
+    db.run("INSERT INTO Teaches VALUES(83821, 'CS-190', 2 , 'Spring' ,2009)");
+    db.run("INSERT INTO Teaches VALUES(83821, 'CS-319', 1 , 'Spring' ,2010)");
+    db.run("INSERT INTO Teaches VALUES(98345, 'EE-101', 1 , 'Spring' ,2009)");
+
+    /*
+    //Print Name and course ID
+    //Method 1
+    db.each("SELECT Instructor.Name, Teaches.ID FROM Instructor INNER JOIN Teaches ON Teaches.ID = Instructor.ID ", function(err,row) {
+        if(err)
+            console.log(err);
+        console.log(row);
+    });
+
+    //Method 2
+    db.each("SELECT Instructor.Name, Teaches.ID FROM Instructor, Teaches WHERE Teaches.ID = Instructor.ID ", function(err,row) {
+        if(err)
+            console.log(err);
+        console.log(row);
+    });
+
+    //GET ALL INFORMATION
+    db.each("SELECT * FROM Instructor NATURAL JOIN Teaches ", function(err,row) {
+        if(err)
+            console.log(err);
+        console.log(row);
+    });
+    */
+
+   db.run("CREATE TABLE Student (ID NUMBER, Name TEXT, Dept_name TEXT, Tot_cred NUMBER)");
+
+   db.run("INSERT INTO Student VALUES(00128, 'Zhang', 'Comp. Sci.', 102)");
+   db.run("INSERT INTO Student VALUES(70557, 'Snow', 'Physics', 0)");
+
+   db.run("CREATE TABLE Takes (ID NUMBER, Course_id TEXT, Sec_id NUMBER, Semester TEXT, Year NUMBER, Grade TEXT)");
+
+   db.run("INSERT INTO Takes VALUES(00128, 'CS-101', 1, 'Fall', 2009, 'A')");
+   db.run("INSERT INTO Takes VALUES(00128, 'CS-347', 1, 'Fall', 2009, 'A-')");
+
+   //Display all the courses a student has taken
+
+   db.all("SELECT * FROM Student, Takes WHERE Student.ID = Takes.ID",function(err,row){
+       if(err)
+           console.log(err);
+       //console.log(row);
+   });
+
+   //Display all students and the courses they've taken
+   //Student name and course name
+
+   db.all("SELECT Student.Name, Takes.Course_id FROM Student \
+   NATURAL LEFT OUTER JOIN Takes",function(err,row){
+       if(err)
+           console.log(err);
+       //console.log(row);
+   });
+
+   //Display all students and the courses they've taken using views
+   //Student name and course name semester
+
+   //Let's use a view that includes all of our attributes 
+
+   db.run("CREATE VIEW studentCourses AS \
+   SELECT * FROM Student \
+   NATURAL LEFT OUTER JOIN Takes");
+
+   db.each("SELECT * FROM studentCourses",function(err,row){
+       //console.log(row);
+   });
+
+   db.each("SELECT studentCourses.Name, studentCourses.Course_id FROM studentCourses",function(err,row){
+       console.log(row);
+   });
 
 });
